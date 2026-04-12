@@ -1,0 +1,84 @@
+{
+  "company": "AutoStream",
+  "product": "Automated video editing tools for content creators",
+
+  "plans": [
+    {
+      "name": "Basic Plan",
+      "price": "$29/month",
+      "features": [
+        "10 videos/month",
+        "720p resolution"
+      ],
+      "summary": "Basic Plan costs $29/month and includes 10 videos per month with 720p resolution."
+    },
+    {
+      "name": "Pro Plan",
+      "price": "$79/month",
+      "features": [
+        "Unlimited videos",
+        "4K resolution",
+        "AI captions"
+      ],
+      "summary": "Pro Plan costs $79/month and includes unlimited videos, 4K resolution, and AI captions."
+    }
+  ],
+
+  "policies": [
+    {
+      "type": "refund_policy",
+      "content": "AutoStream does not provide refunds after 7 days from the date of purchase."
+    },
+    {
+      "type": "support_policy",
+      "content": "24/7 customer support is available only on the Pro Plan."
+    }
+  ],
+
+  "faq": [
+    {
+      "question": "What does AutoStream do?",
+      "answer": "AutoStream is a SaaS platform that helps content creators automate video editing workflows."
+    },
+    {
+      "question": "Which plan includes AI captions?",
+      "answer": "The Pro Plan includes AI captions."
+    },
+    {
+      "question": "Is support available all day?",
+      "answer": "24/7 support is available only on the Pro Plan."
+    },
+    {
+      "question": "What is the refund policy?",
+      "answer": "AutoStream does not provide refunds after 7 days from the date of purchase."
+    },
+    {
+      "question": "Can I get a refund after one week?",
+      "answer": "No. Refunds are not available after 7 days."
+    },
+    {
+      "question": "Who gets 24/7 support?",
+      "answer": "Only Pro Plan users get 24/7 support."
+    },
+    {
+      "question": "What is the price of the Basic Plan?",
+      "answer": "The Basic Plan costs $29/month."
+    },
+    {
+      "question": "What is the price of the Pro Plan?",
+      "answer": "The Pro Plan costs $79/month."
+    }
+  ],
+
+  "retrieval_text": [
+    "AutoStream is a SaaS product that provides automated video editing tools for content creators.",
+    "Basic Plan: price is $29/month. Features: 10 videos/month, 720p resolution.",
+    "Pro Plan: price is $79/month. Features: Unlimited videos, 4K resolution, AI captions.",
+    "Refund Policy: AutoStream does not provide refunds after 7 days from the date of purchase.",
+    "Support Policy: 24/7 customer support is available only on the Pro Plan.",
+    "FAQ - What does AutoStream do? Answer: AutoStream is a SaaS platform that helps content creators automate video editing workflows.",
+    "FAQ - Which plan includes AI captions? Answer: The Pro Plan includes AI captions.",
+    "FAQ - Is support available all day? Answer: 24/7 support is available only on the Pro Plan.",
+    "FAQ - What is the refund policy? Answer: AutoStream does not provide refunds after 7 days from the date of purchase."
+  ]
+}
