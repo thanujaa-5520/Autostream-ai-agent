@@ -1,0 +1,13 @@
+Demo Flow Suggestion
+====================
+
+1. User: Hi, tell me about your pricing.
+2. Agent: Answers from local knowledge base.
+3. User: That sounds good, I want to try the Pro plan for my YouTube channel.
+4. Agent: Detects high intent and asks for name.
+5. User: My name is Thanujaa.
+6. Agent: Asks for email.
+7. User: thanu@example.com
+8. Agent: Confirms / asks for platform if needed.
+9. User: YouTube
+10. Agent: Calls mock_lead_capture() and confirms success.
