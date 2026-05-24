@@ -1,70 +1,199 @@
-# AutoStream Social-to-Lead Agentic Workflow
+# AutoStream — Conversational AI Sales Agent
 
-This project implements a conversational AI agent for a fictional SaaS company called **AutoStream**, which offers automated video editing tools for content creators. The agent is designed to simulate a real business workflow rather than act as a simple chatbot.
+A **stateful conversational AI agent** for a fictional SaaS company called AutoStream, which sells automated video editing tools for content creators. The agent identifies user intent, answers product questions from a local knowledge base, qualifies sales leads across multiple turns, and captures lead data once all required fields are collected.
 
-## Features
-- Intent identification for:
-  - casual greeting
-  - product or pricing inquiry
-  - high-intent lead
-- RAG-style answer generation using a **local JSON knowledge base**
-- Memory/state across multiple turns
-- Lead qualification workflow
-- Mock tool execution using `mock_lead_capture(name, email, platform)`
+Built with **Python**, **LangGraph**, and **Streamlit** — runs as both an interactive CLI and a web chat UI.
 
-## Project Structure
-```bash
-.
-├── agent/
-│   ├── graph.py
-│   ├── intent.py
-│   ├── rag.py
-│   ├── state.py
-│   └── tools.py
-├── data/
-│   └── knowledge.json
-├── demo_script.txt
-├── main.py
-├── README.md
-└── requirements.txt
+---
+
+## What It Does
+
+The agent handles three types of conversations:
+
+| Intent | Example message | Agent behaviour |
+|---|---|---|
+| Casual greeting | *"Hi, hello"* | Friendly welcome, offers help |
+| Product / pricing inquiry | *"What are your plans? How much does Pro cost?"* | Retrieves answer from local JSON knowledge base |
+| High-intent lead | *"I want to sign up for Pro"* | Starts lead qualification — collects name, email, platform, then fires `mock_lead_capture()` |
+
+State persists across turns — the agent remembers partial lead data and picks up exactly where it left off.
+
+---
+
+## Architecture
+
+The agent is modelled as a **LangGraph state machine** with five nodes:
+
+```
+User message
+     │
+     ▼
+┌─────────┐
+│  intent │  ← classifies message: greeting / inquiry / high_intent_lead
+└────┬────┘
+     │
+     ├── greeting / inquiry ──────────────────► retrieval ──► respond ──► END
+     │
+     └── high_intent_lead / partial lead ──► lead_router
+                                                   │
+                                          ┌────────┴────────┐
+                                          │                 │
+                                     need more info    all fields collected
+                                          │                 │
+                                       respond           tool (mock_lead_capture)
+                                          │                 │
+                                         END              END
 ```
 
-## How to Run Locally
-1. Create a virtual environment:
-   ```bash
-   python -m venv .venv
-   ```
-2. Activate it:
-   - Windows:
-     ```bash
-     .venv\Scripts\activate
-     ```
-   - macOS/Linux:
-     ```bash
-     source .venv/bin/activate
-     ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the agent:
-   ```bash
-   python main.py
-   ```
+### Node responsibilities
 
-## Architecture Explanation
-I chose **LangGraph** because the assignment asks for an agent that can reason over multiple steps, preserve state across several turns, and trigger a tool only when business conditions are satisfied. LangGraph is a good fit for this because it models the agent as an explicit workflow graph, which makes the behavior easy to understand, test, and extend.
+| Node | File | What it does |
+|---|---|---|
+| `intent` | `agent/intent.py` | Keyword-based intent classifier + entity extractor (name, email, platform) |
+| `retrieval` | `agent/rag.py` | Fetches relevant text from `data/knowledge.json` |
+| `lead_router` | `agent/graph.py` | Checks which lead fields are missing; sets `next_action` |
+| `respond` | `agent/graph.py` | Generates contextual response based on intent and state |
+| `tool` | `agent/tools.py` | Calls `mock_lead_capture(name, email, platform)` once all fields are present |
 
-The graph in this project contains five major stages: **intent detection**, **retrieval**, **lead routing**, **response generation**, and **tool execution**. The first node classifies the user message into one of the required intent categories. If the message is informational, the flow moves to retrieval, where the system fetches relevant details from a local JSON knowledge base. If the message indicates strong buying intent, the workflow moves into lead routing, where the system checks whether the user’s name, email, and creator platform have all been collected.
+### State
 
-State is managed through a shared `ChatState` object. This state stores conversation messages, detected intent, retrieved knowledge, pending fields, and captured lead information. Because the same state is passed through every node, the agent can remember details over 5–6 turns and avoid triggering the tool prematurely.
+All nodes share a `ChatState` TypedDict (defined in `agent/state.py`) that carries messages, intent, retrieved context, lead fields, and completion flags across turns.
 
-## WhatsApp Deployment Using Webhooks
-To integrate this agent with WhatsApp in production, I would place the LangGraph workflow behind a backend API built with FastAPI or Flask. A WhatsApp Business API provider such as Meta Cloud API or Twilio would send incoming user messages to a webhook endpoint. The webhook would extract the sender ID, map it to a stored conversation state, pass the message into the LangGraph agent, and return the generated response back to WhatsApp through the provider’s messaging API.
+---
 
-The main production requirement is **session persistence**. Instead of storing state only in memory, I would store each user’s conversation state in Redis or a database. That ensures the agent remembers previous turns even if the backend restarts. I would also add validation, logging, retry handling, and authentication for secure webhook processing.
+## Project Structure
 
-## Notes
-- The knowledge base is stored locally in `data/knowledge.json`.
-- Tool execution occurs only after all required lead fields are collected.
-- This implementation is intentionally lightweight and easy to run for assignment/demo purposes.
+```
+Autostream-ai-agent/
+├── agent/
+│   ├── graph.py        # LangGraph workflow: nodes, edges, conditional routing
+│   ├── intent.py       # Intent classification and entity extraction
+│   ├── rag.py          # Local knowledge base retrieval
+│   ├── state.py        # ChatState TypedDict definition
+│   └── tools.py        # mock_lead_capture tool
+├── data/
+│   └── knowledge.json  # AutoStream product info, pricing, FAQs, policies
+├── app.py              # Streamlit web chat UI
+├── main.py             # CLI interface (terminal chat loop)
+├── demo_script.txt     # Suggested demo conversation walkthrough
+├── requirements.txt    # Python dependencies
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Python 3.9+
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/thanujaa-5520/Autostream-ai-agent.git
+cd Autostream-ai-agent
+
+# Create and activate a virtual environment
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# macOS / Linux
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+---
+
+## Running the Agent
+
+### Option 1 — Streamlit web UI (recommended for demos)
+
+```bash
+streamlit run app.py
+```
+
+Opens at [http://localhost:8501](http://localhost:8501). Chat in the browser with a debug panel showing intent, lead fields, and capture status.
+
+### Option 2 — Terminal CLI
+
+```bash
+python main.py
+```
+
+Type messages at the `You:` prompt. Type `exit` to quit.
+
+---
+
+## Demo Walkthrough
+
+Follow `demo_script.txt` for a full end-to-end lead qualification demo:
+
+```
+You:  Hi, tell me about your pricing.
+Agent: [retrieves pricing from knowledge base]
+
+You:  That sounds good, I want to try the Pro plan for my YouTube channel.
+Agent: Detects high intent → asks for name
+
+You:  My name is Thanujaa.
+Agent: Asks for email
+
+You:  thanu@example.com
+Agent: Asks for platform (if not already extracted)
+
+You:  YouTube
+Agent: Calls mock_lead_capture() → "Lead captured successfully!"
+```
+
+---
+
+## Tech Stack
+
+| Technology | Version | Purpose |
+|---|---|---|
+| Python | 3.9+ | Runtime |
+| LangGraph | ≥ 0.2.40 | Stateful agent graph |
+| LangChain | ≥ 0.3.0 | Agent orchestration primitives |
+| Streamlit | ≥ 1.40.0 | Web chat interface |
+
+---
+
+## Production Deployment (WhatsApp / Webhook)
+
+To deploy this agent to WhatsApp in production:
+
+1. Wrap the LangGraph workflow in a **FastAPI** or **Flask** webhook endpoint
+2. Connect a WhatsApp Business API provider (Meta Cloud API or Twilio)
+3. Replace in-memory `ChatState` with **Redis** or a database for session persistence across restarts
+4. Add input validation, retry logic, logging, and webhook signature verification
+
+---
+
+## Future Improvements
+
+- [ ] Swap keyword intent classification for an LLM-based classifier
+- [ ] Replace local JSON RAG with a vector database (FAISS / Chroma)
+- [ ] Add WhatsApp or Slack webhook integration
+- [ ] Persist lead capture to a real CRM (HubSpot, Salesforce)
+- [ ] Add unit tests for each graph node
+
+---
+
+## Author
+
+**Thanujaa TSK**
+B.Tech CSE — VIT Chennai | Registration No: 24BCE5520
+GitHub: [@thanujaa-5520](https://github.com/thanujaa-5520)
+
+---
+
+## License
+
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
