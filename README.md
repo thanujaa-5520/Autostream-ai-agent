@@ -1,5 +1,11 @@
 # AutoStream — Conversational AI Sales Agent
 
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![LangGraph](https://img.shields.io/badge/LangGraph-0.2.40+-4A90E2?style=flat-square)](https://github.com/langchain-ai/langgraph)
+[![LangChain](https://img.shields.io/badge/LangChain-0.3.0+-1C3C3C?style=flat-square)](https://langchain.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.40.0+-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
 A **stateful conversational AI agent** for a fictional SaaS company called AutoStream, which sells automated video editing tools for content creators. The agent identifies user intent, answers product questions from a local knowledge base, qualifies sales leads across multiple turns, and captures lead data once all required fields are collected.
 
 Built with **Python**, **LangGraph**, and **Streamlit** — runs as both an interactive CLI and a web chat UI.
@@ -24,25 +30,16 @@ State persists across turns — the agent remembers partial lead data and picks 
 
 The agent is modelled as a **LangGraph state machine** with five nodes:
 
-```
-User message
-     │
-     ▼
-┌─────────┐
-│  intent │  ← classifies message: greeting / inquiry / high_intent_lead
-└────┬────┘
-     │
-     ├── greeting / inquiry ──────────────────► retrieval ──► respond ──► END
-     │
-     └── high_intent_lead / partial lead ──► lead_router
-                                                   │
-                                          ┌────────┴────────┐
-                                          │                 │
-                                     need more info    all fields collected
-                                          │                 │
-                                       respond           tool (mock_lead_capture)
-                                          │                 │
-                                         END              END
+```mermaid
+flowchart TD
+    U([User Message]) --> I[intent\nclassify: greeting / inquiry / lead]
+    I -->|greeting or inquiry| R[retrieval\nfetch from knowledge.json]
+    R --> Resp[respond\ngenerate contextual reply]
+    Resp --> E([END])
+    I -->|high_intent_lead\nor partial lead| LR[lead_router\ncheck missing fields]
+    LR -->|fields missing| Resp
+    LR -->|all fields present| T[tool\nmock_lead_capture\nname · email · platform]
+    T --> E
 ```
 
 ### Node responsibilities
